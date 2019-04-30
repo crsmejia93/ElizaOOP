@@ -22,7 +22,7 @@ public class Eliza extends Message{
     }
     //this will run all the logic
     public void runEliza(){
-        populateFromPigFile(words, fileName);
+        populateFromFile(words, fileName);
         System.out.println("Good day. What is your problem");
         System.out.print("Enter your response here or Q to quit: ");
         answer = input.nextLine();
@@ -86,6 +86,18 @@ public class Eliza extends Message{
             while (scanInput.hasNextLine()) {
                 myMap.put(scanInput.next().charAt(0), scanInput.nextLine());
 
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("File was not found.");
+        }
+    }
+
+    private static void populateFromFile(HashMap<String, String> myMap, String fileName) {
+        File file = new File(fileName);
+        try {
+            Scanner scanInput = new Scanner(file);
+            while (scanInput.hasNextLine()) {
+                myMap.put(scanInput.next(), scanInput.nextLine());
             }
         } catch (FileNotFoundException e) {
             System.out.println("File was not found.");
