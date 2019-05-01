@@ -8,26 +8,25 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Eliza extends Message{
-    ArrayList<Message> messages;
+    HashMap<String, Message> messages;
     HashMap<String, String> words = new HashMap<>();
-    String[] hedge = {"Please tell me more", "Many of my patients tell me the same thing"};
-    String[] qualifier = {"Why do you say that", "You seem to think that", "So, you are concerned that"};
     String fileName = "words.txt";//This is the file that will be looked for.
     Scanner input = new Scanner(System.in);
     String answer;
     int random;
 
     public Eliza(){
-        messages = new ArrayList<>();
+        messages = new HashMap<>();
     }
     //this will run all the logic
     public void runEliza(){
+        int index=0;
         populateFromFile(words, fileName);
         System.out.println("Good day. What is your problem");
         System.out.print("Enter your response here or Q to quit: ");
         answer = input.nextLine();
         if(!answer.equalsIgnoreCase("pig")) {
-            addMessage(new Message(answer));
+            addMessage(answer, new Message(answer));
         }
         while(!answer.equalsIgnoreCase("q")){
             if(answer.equalsIgnoreCase("pig")){
@@ -35,16 +34,42 @@ public class Eliza extends Message{
             }else{
                 random = (int)(1+Math.random()*20);
                 if(random<10){
-                    for(Message m: messages){
-                        if(m.equals(answer)){
-                            answer = replaceWords(m.getMessageArray(), qualifier, words);
-                            System.out.println(answer);
-                        }
-                    }
+                    System.out.println(respond(words, answer));
+                }else{
+                    printHedge();
                 }
             }//end if-else
+            System.out.print("Enter your response here or Q to quit: ");
+            answer = input.nextLine();
         }
 
+    }
+
+    private String respond(HashMap<String, String> words, String answer) {
+        String[] qualifier = {"Why do you say that", "You seem to think that", "So, you are concerned that"};
+        //This will return a String array of the Message being retrieved by the key in the answer String
+        String[] m = messages.get(answer).getMessageArray();
+        String str="";
+        //Iterate through each word
+        for(int i=0; i<m.length; i++){
+            //if the word in m is contained as a key in the hashmap words
+            if(words.containsKey(m[i])){
+                //then replace the word at that location with the value the key is paired with
+                m[i] = words.get(m[i]);
+            }
+        }
+        //generate random number to select from the qualifier array
+        int randIndex = (int) (Math.random() * qualifier.length - 1);
+        str = qualifier[randIndex];
+        str = str.concat(" " + String.join(" ", m));
+//        messages.get(answer).setMessage(str);
+        return str;
+    }
+
+    private void printHedge() {
+        String[] hedge = {"Please tell me more", "Many of my patients tell me the same thing"};
+        int index = (int)(Math.random() * hedge.length);
+        System.out.println(hedge[index]);
     }
 
     public void playPigLatin(){
@@ -74,9 +99,9 @@ public class Eliza extends Message{
         return str.concat(String.join("", tempStr));
     }
 
-    public void ansToQues(Message message){}
 
-    public void addMessage(Message message){
+    public void addMessage(String str, Message message){
+        messages.put(str, message);
     }
 
     private static void populateFromPigFile(HashMap<Character, String> myMap, String fileName) {
